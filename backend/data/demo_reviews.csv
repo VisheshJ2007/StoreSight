@@ -1,0 +1,6 @@
+store_id,rating,source,review_text
+1,4.5,UberEats,"Amazing food, portions were generous."
+1,3.0,DoorDash,"Delivery was okay but fries were soggy."
+1,5.0,Google,"Best meal I've had all week!"
+2,2.5,Grubhub,"Order took too long to arrive."
+2,4.0,UberEats,"Pretty good overall, will order again."

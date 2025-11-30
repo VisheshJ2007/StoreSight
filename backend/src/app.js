@@ -1,5 +1,8 @@
 // backend/src/app.js
 
+import dotenv from 'dotenv';
+dotenv.config();           // ⬅️ make sure .env is loaded before anything else
+
 import express from 'express';
 import cors from 'cors';
 import { config } from './config/index.js';
