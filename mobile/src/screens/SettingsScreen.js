@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { colors, cardShadow } from "../theme";
 
 // For emulators: http://10.0.2.2:4000 (Android), http://localhost:4000 (iOS/web)
 // For real devices on Wi‑Fi: http://<your-lan-ip>:4000
@@ -110,35 +111,45 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <Text style={styles.subtitle}>
-        Upload new review data for your store from a CSV file.
-      </Text>
-
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.6 }]}
-        onPress={uploadCsv}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Uploading" : "Upload Reviews CSV"}
+      <View style={styles.contentWrapper}>
+        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.subtitle}>
+          Upload new review data for your store from a CSV file.
         </Text>
-      </TouchableOpacity>
 
-      {selectedFileName && (
-        <Text style={styles.fileName}>Selected file: {selectedFileName}</Text>
-      )}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Upload Reviews CSV</Text>
+          <Text style={styles.cardSubtitle}>
+            Pick a CSV file from your device and well import the
+            reviews into StoreSight.
+          </Text>
 
-      {status && (
-        <Text style={[styles.status, { color: statusColor }]}>{status}</Text>
-      )}
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.6 }]}
+            onPress={uploadCsv}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Uploading..." : "Choose CSV & Upload"}
+            </Text>
+          </TouchableOpacity>
 
-      <Text style={styles.note}>
-        CSV must match the backend importer format:{" "}
-        <Text style={{ fontWeight: "600" }}>
-          store_id, rating, source, review_text
-        </Text>
-      </Text>
+          {selectedFileName && (
+            <Text style={styles.fileName}>Selected file: {selectedFileName}</Text>
+          )}
+
+          {status && (
+            <Text style={[styles.status, { color: statusColor }]}>{status}</Text>
+          )}
+
+          <Text style={styles.note}>
+            CSV must match the importer format:{" "}
+            <Text style={styles.noteEmphasis}>
+              store_id, rating, source, review_text
+            </Text>
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -146,26 +157,50 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: colors.background,
     padding: 20,
+  },
+  contentWrapper: {
+    flex: 1,
+    justifyContent: "center",
   },
   title: {
     fontSize: 26,
     fontWeight: "700",
+    marginBottom: 4,
   },
   subtitle: {
-    marginTop: 6,
     fontSize: 14,
-    color: "#555",
+    color: colors.muted,
     textAlign: "center",
+    textAlign: "left",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...cardShadow,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: colors.muted,
+    marginBottom: 16,
   },
   button: {
-    backgroundColor: "#2563eb",
+    backgroundColor: colors.primary,
     paddingHorizontal: 22,
     paddingVertical: 12,
     borderRadius: 25,
-    marginTop: 20,
+    marginTop: 8,
+    alignItems: "center",
   },
   buttonText: {
     color: "white",
@@ -176,16 +211,21 @@ const styles = StyleSheet.create({
     marginTop: 15,
     fontSize: 14,
     textAlign: "center",
+    textAlign: "left",
   },
   fileName: {
     marginTop: 12,
     fontSize: 13,
-    color: "#555",
+    color: colors.muted,
   },
   note: {
     marginTop: 25,
     fontSize: 12,
-    textAlign: "center",
-    color: "#777",
+    textAlign: "left",
+    color: colors.muted,
+  },
+  noteEmphasis: {
+    fontWeight: "600",
+    color: colors.primary,
   },
 });

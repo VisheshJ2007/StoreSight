@@ -7,6 +7,7 @@ import path from 'path';
 import csv from 'csv-parser';
 
 import { metricsService } from '../services/metricsService.js';
+import { getStoreSummary } from '../services/summaryService.js';
 import {
   getReviewsForStore,
   insertReview,
@@ -111,6 +112,8 @@ router.post(
     const filePath = req.file.path;
     const storeId = parseInt(id, 10);
     const reviews = [];
+    let importedCount = 0;
+    let skippedCount = 0;
 
     try {
       // Read CSV into memory
@@ -157,6 +160,15 @@ router.post(
                 ? Number(sentimentScoreRaw)
                 : null;
 
+            const hasMeaningfulContent =
+              (rating !== null && !Number.isNaN(rating)) ||
+              (text && text.trim().length > 0);
+
+            if (!hasMeaningfulContent) {
+              skippedCount += 1;
+              return;
+            }
+
             reviews.push({
               storeId,
               rating,
@@ -166,6 +178,7 @@ router.post(
               text,
               createdAt: createdAtRaw,
             });
+            importedCount += 1;
           })
           .on('end', () => resolve())
           .on('error', (err) => reject(err));
@@ -179,7 +192,8 @@ router.post(
 
       res.status(201).json({
         message: 'CSV imported',
-        rowsInserted: reviews.length,
+        rowsInserted: importedCount,
+        skippedRows: skippedCount,
       });
     } catch (err) {
       console.error('Error importing CSV:', err);
@@ -215,6 +229,28 @@ router.get('/:id/metrics', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch metrics' });
+  }
+});
+
+// ----------------------
+// GET /stores/:id/summary?range=7d
+// High-level summary combining overview, metrics, and issues
+// ----------------------
+router.get('/:id/summary', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { range = '7d' } = req.query;
+
+    const storeIdNum = Number(id);
+    if (!Number.isFinite(storeIdNum)) {
+      return res.status(400).json({ error: 'Invalid store id' });
+    }
+
+    const summary = await getStoreSummary(storeIdNum, range);
+    res.json(summary);
+  } catch (err) {
+    console.error('Error fetching store summary:', err);
+    res.status(500).json({ error: 'Failed to fetch store summary' });
   }
 });
 

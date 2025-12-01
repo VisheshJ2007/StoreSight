@@ -1,5 +1,6 @@
 // backend/src/services/metricsService.js
 import { execute } from './snowflakeClient.js';
+import { tagThemesForReviewText } from './issueThemes.js';
 
 /**
  * High-level summary for a store
@@ -105,6 +106,7 @@ async function getStoreIssues(storeId, limit = 20) {
     sentimentLabel: row.SENTIMENT_LABEL,
     text: row.REVIEW_TEXT,
     createdAt: row.CREATED_AT,
+    themes: tagThemesForReviewText(row.REVIEW_TEXT),
   }));
 }
 

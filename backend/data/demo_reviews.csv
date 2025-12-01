@@ -1,6 +1,19 @@
-store_id,rating,source,review_text
-1,4.5,UberEats,"Amazing food, portions were generous."
-1,3.0,DoorDash,"Delivery was okay but fries were soggy."
-1,5.0,Google,"Best meal I've had all week!"
-2,2.5,Grubhub,"Order took too long to arrive."
-2,4.0,UberEats,"Pretty good overall, will order again."
+store_id,rating,source,review_text,created_at
+1,5,DoorDash,"Amazing food and friendly staff, super quick delivery!",2025-11-23 18:30:00
+1,4.5,Grubhub,"Great service and tasty meal, will order again.",2025-11-23 19:10:00
+1,4,UberEats,"Food was good but a bit salty.",2025-11-24 12:15:00
+1,3,DoorDash,"Delivery was okay but fries were soggy.",2025-11-24 13:05:00
+1,2,DoorDash,"Order was cold and missing sauce.",2025-11-24 20:45:00
+1,2.5,Grubhub,"Food was bland and the portion was small.",2025-11-25 11:20:00
+1,3.5,UberEats,"Solid lunch, but wait time was longer than expected.",2025-11-25 13:50:00
+1,1.5,DoorDash,"Very slow service and rude staff at pickup.",2025-11-26 19:05:00
+1,5,DoorDash,"Fast delivery and everything was hot and fresh!",2025-11-26 20:10:00
+1,4,Grubhub,"Nice atmosphere and good music.",2025-11-27 18:40:00
+1,2.5,UberEats,"Restaurant was dirty and tables were sticky.",2025-11-27 19:30:00
+1,3,DoorDash,"Food was fine but overpriced for the portion.",2025-11-28 12:00:00
+1,4.5,Grubhub,"Excellent value and generous portions.",2025-11-28 13:25:00
+1,1.5,DoorDash,"Cold burger, missing fries, and long wait.",2025-11-29 21:10:00
+1,5,UberEats,"Best burger I've had in months, super fast.",2025-11-29 21:45:00
+1,4,DoorDash,"Friendly staff and clean dining area.",2025-11-30 11:30:00
+1,2.0,Grubhub,"Loud music and crowded, couldn't enjoy the meal.",2025-11-30 19:15:00
+1,3.5,DoorDash,"Decent experience overall, nothing special.",2025-11-30 20:05:00

@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
+import { colors, cardShadow } from '../theme';
 
 const BACKEND_URL = 'http://localhost:4000'; // same as OverviewScreen
 
@@ -17,23 +19,24 @@ export default function ReviewsScreen() {
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
 
+  const fetchReviews = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/stores/1/reviews`);
+      const data = await res.json();
+
+      const list = Array.isArray(data) ? data : data.reviews || [];
+      setReviews(list);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load reviews');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const res = await fetch(`${BACKEND_URL}/stores/1/reviews`);
-        const data = await res.json();
-
-        // Support either: [ ... ] or { reviews: [ ... ] }
-        const list = Array.isArray(data) ? data : data.reviews || [];
-        setReviews(list);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load reviews');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReviews();
   }, []);
 
@@ -114,7 +117,7 @@ export default function ReviewsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator />
+        <ActivityIndicator color={colors.primary} />
         <Text style={styles.loadingText}>Loading reviews…</Text>
       </View>
     );
@@ -124,6 +127,9 @@ export default function ReviewsScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.refreshButton} onPress={fetchReviews}>
+          <Text style={styles.refreshButtonText}>Try again</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -132,6 +138,9 @@ export default function ReviewsScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>No reviews found for this store.</Text>
+        <TouchableOpacity style={styles.refreshButton} onPress={fetchReviews}>
+          <Text style={styles.refreshButtonText}>Refresh</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -145,10 +154,24 @@ export default function ReviewsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.summaryTitle}>Reviews</Text>
+          <Text style={styles.summarySubtitle}>See every review in one place.</Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.refreshChip, loading && { opacity: 0.6 }]}
+          onPress={fetchReviews}
+          disabled={loading}
+        >
+          <Text style={styles.refreshChipText}>{loading ? 'Refreshing…' : 'Refresh'}</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Reviews</Text>
         <Text style={styles.summaryLine}>
-          Total: <Text style={styles.summaryValue}>{reviews.length}</Text>
+          Total reviews:{' '}
+          <Text style={styles.summaryValue}>{reviews.length}</Text>
         </Text>
         {avgRating ? (
           <Text style={styles.summaryLine}>
@@ -177,6 +200,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 8,
@@ -184,48 +208,60 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    color: '#ef4444',
+    color: colors.danger,
   },
   emptyText: {
     fontSize: 14,
-    color: '#555',
+    color: colors.muted,
   },
   container: {
     padding: 16,
     paddingBottom: 32,
+    backgroundColor: colors.background,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   summaryCard: {
-    backgroundColor: '#f3f3f3',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 14,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...cardShadow,
   },
   summaryTitle: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 2,
+  },
+  summarySubtitle: {
+    fontSize: 13,
+    color: colors.muted,
   },
   summaryLine: {
     fontSize: 14,
-    color: '#555',
+    color: colors.muted,
   },
   summaryValue: {
     fontWeight: '600',
-    color: '#111',
+    color: '#111827',
   },
   list: {
     gap: 12,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 14,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2, // Android shadow
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...cardShadow,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -238,7 +274,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#777',
+    color: colors.muted,
   },
   sentimentPill: {
     alignSelf: 'flex-start',
@@ -255,5 +291,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111',
     marginTop: 4,
+  },
+  refreshButton: {
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: colors.primarySoft,
+  },
+  refreshButtonText: {
+    color: colors.primary,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  refreshChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  refreshChipText: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '500',
   },
 });

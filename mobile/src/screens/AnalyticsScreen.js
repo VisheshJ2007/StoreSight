@@ -1,7 +1,8 @@
 // mobile/src/screens/AnalyticsScreen.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { colors, cardShadow } from '../theme';
 
 const BACKEND_URL = 'http://localhost:4000';
 
@@ -9,29 +10,33 @@ export default function AnalyticsScreen() {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState([]);
   const [error, setError] = useState(null);
+  const [range, setRange] = useState('7d'); // '7d' | '30d' | '90d'
+
+  const fetchMetrics = async (selectedRange) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/stores/1/metrics?range=${selectedRange}`);
+      const data = await res.json();
+      setMetrics(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load analytics');
+      setMetrics([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const res = await fetch(`${BACKEND_URL}/stores/1/metrics?range=7d`);
-        const data = await res.json();
-        setMetrics(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load analytics');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMetrics();
-  }, []);
+    fetchMetrics(range);
+  }, [range]);
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator />
-        <Text>Loading analytics…</Text>
+        <Text style={styles.mutedText}>Loading analytics…</Text>
       </View>
     );
   }
@@ -47,7 +52,7 @@ export default function AnalyticsScreen() {
   if (!metrics.length) {
     return (
       <View style={styles.center}>
-        <Text>No analytics data for this range.</Text>
+        <Text style={styles.mutedText}>No analytics data for this range.</Text>
       </View>
     );
   }
@@ -62,7 +67,30 @@ export default function AnalyticsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Analytics (Last 7 Days)</Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>Analytics</Text>
+          <Text style={styles.subtitle}>Last {range === '7d' ? '7' : range === '30d' ? '30' : '90'} days</Text>
+        </View>
+        <View style={styles.rangeToggle}>
+          {['7d', '30d', '90d'].map((value) => (
+            <TouchableOpacity
+              key={value}
+              style={[styles.rangeButton, range === value && styles.rangeButtonActive]}
+              onPress={() => setRange(value)}
+            >
+              <Text
+                style={[
+                  styles.rangeButtonText,
+                  range === value && styles.rangeButtonTextActive,
+                ]}
+              >
+                {value.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLine}>
@@ -118,6 +146,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     paddingBottom: 32,
+    backgroundColor: colors.background,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   title: {
     fontSize: 22,
@@ -125,32 +160,58 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   errorText: {
-    color: '#ef4444',
+    color: colors.danger,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: colors.muted,
+  },
+  rangeToggle: {
+    flexDirection: 'row',
+    borderRadius: 999,
+    backgroundColor: '#e5e7eb',
+    overflow: 'hidden',
+  },
+  rangeButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  rangeButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  rangeButtonText: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '500',
+  },
+  rangeButtonTextActive: {
+    color: '#ffffff',
   },
   summaryCard: {
-    backgroundColor: '#f3f3f3',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...cardShadow,
   },
   summaryLine: {
     fontSize: 14,
-    color: '#555',
+    color: colors.muted,
   },
   summaryValue: {
     fontWeight: '600',
     color: '#111',
   },
   dayCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 12,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...cardShadow,
   },
   dayDate: {
     fontSize: 16,
@@ -159,10 +220,13 @@ const styles = StyleSheet.create({
   },
   dayLine: {
     fontSize: 14,
-    color: '#555',
+    color: colors.muted,
   },
   dayValue: {
     fontWeight: '600',
     color: '#111',
+  },
+  mutedText: {
+    color: colors.muted,
   },
 });
